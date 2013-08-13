@@ -12,13 +12,13 @@
         }
 
         .node {
-          stroke: #000;
-          fill: #c9f;
+          stroke: #001;
+          fill: #39f;
           stroke-width: .5px;
         }
 
         .link {
-          stroke: #999;
+          stroke: #00f;
           stroke-width: .5px;
           stroke-opacity: .2;
         }
@@ -27,44 +27,46 @@
     </head>
 
     <body>
-        <a href="#" onclick="setSpecies('rodent');">Rodent</a>
+        <a href="#" onclick="reset('rodent');">Rodent</a>
+        <a href="#" onclick="reset('fish');">Fish</a>
         Human
-        Fish
         <script type="text/javascript">
 
-        var neuron_nums = {"human": 2000, "rodent": 100, "fish": 5};
-        var neuron_num = neuron_nums["human"];
 
-        var setSpecies = function(species) {
-            neuron_num = neuron_nums[species];
-            force.start();
-        }
-
-        var w = 750;
-        var h = 600;
-        var connections_num = neuron_num/1000
-
-        var connections = [{"source": 0, "target": 1}];
-
+        var w = 700;
+        var h = 700;
+        var r = 7.5;
         var neurons = [];
-        for (var i=0; i<neuron_num; i++) {
-            neurons[i] = {};
-        }
+        var connections = [];
 
-        connections = []
-        for (var i=0; i<connections_num; i++) {
-            d3.range(neuron_num)
-            .map(function(x) { 
-                connections.push({"source":x , "target":Math.floor(Math.random() * neuron_num)});
-            });
+        var setup = function() {
+            var neuron_num = 500;
+
+            var connections_num = neuron_num/100
+
+            for (var i=0; i<neuron_num; i++) {
+                neurons[i] = {"weight": 3};
+            }
+        
+            for (var i=0; i<connections_num; i++) {
+                d3.range(neuron_num)
+                .map(function(x) { 
+                    connections.push({"source":x , "target":Math.floor(Math.random() * neuron_num)});
+                });
+            };
         };
 
+        setup();
+
         var force = d3.layout.force()
-                    .charge(-5)
                     .nodes(neurons)
-                    .gravity(.6)
                     .links(connections)
-                    .size([w,h])
+                    .size([w, h])
+                    .linkDistance(function() { return Math.random() * 20; })
+                    .charge([-1000])
+                    .friction(0.5)
+                    .gravity(0.5)
+                    .theta(0.5)
                     .start();
 
         var svg = d3.select("body")
@@ -79,9 +81,10 @@
 
         var node = svg.selectAll(".node")
                   .data(neurons)
-                  .enter().append("circle")
+                  .enter().append("ellipse")
                   .attr("class", "node")
-                  .attr("r", 3)
+                  .attr("rx", function() { return (Math.random() * r)/2; })
+                  .attr("ry", function() { return Math.random() * r; })
                   .call(force.drag);
 
 
@@ -91,10 +94,44 @@
             .attr("x2", function(d) { return d.target.x; })
             .attr("y2", function(d) { return d.target.y; });
 
-        node.attr("cx", function(d) { return d.x; })
-            .attr("cy", function(d) { return d.y; });
+        node.attr("cx", function(d) { return Math.max(r, Math.min(d.x, w - r)); })
+            .attr("cy", function(d) { return Math.max(r, Math.min(d.y, h - r)); });
 
+        // node.attr("cx", function(d) { 
+        //     return d.x = Math.max(r, Math.min(w - r, d.x)); 
+        // }) 
+        // .attr("cy", function(d) { 
+        //     return d.y = Math.max(r, Math.min(h - r, d.y)); 
+        // });
       });
+
+
+        // var reset = function(species) {
+        //     species = species || "human";
+            
+        //     var neuron_nums = {"human": 500, "rodent": 100, "fish": 5};
+
+        //     neuron_num = neuron_nums[species];
+        //     connections_num = neuron_num/100;
+        //     neurons = [];
+        //     connections = [];
+
+        //     for (var i=0; i<neuron_num; i++) {
+        //         neurons[i] = {"weight": 3};
+        //     }
+        
+        //     for (var i=0; i<connections_num; i++) {
+        //         d3.range(neuron_num)
+        //         .map(function(x) { 
+        //             connections.push({"source":x , "target":Math.floor(Math.random() * neuron_num)});
+        //         });
+        //     };  
+
+        //     force.nodes(neurons)
+        //         .links(connections)
+        //         .start();
+        // };
+
         </script>
 
     </body>
